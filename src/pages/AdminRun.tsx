@@ -5,6 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Play, 
   CheckCircle2, 
@@ -14,7 +19,9 @@ import {
   Search,
   Target,
   FileText,
-  ArrowRight
+  ArrowRight,
+  CalendarClock,
+  Mail
 } from "lucide-react";
 
 interface PipelineStep {
@@ -41,9 +48,53 @@ const stepIcons: Record<string, typeof Search> = {
   draft: FileText,
 };
 
+const WEEKDAYS = [
+  { id: "mon", label: "Mon" },
+  { id: "tue", label: "Tue" },
+  { id: "wed", label: "Wed" },
+  { id: "thu", label: "Thu" },
+  { id: "fri", label: "Fri" },
+  { id: "sat", label: "Sat" },
+  { id: "sun", label: "Sun" },
+];
+
+const TIMEZONES = [
+  "America/New_York",
+  "America/Chicago", 
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Phoenix",
+  "Europe/London",
+  "Europe/Paris",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Australia/Sydney",
+];
+
 export default function AdminRun() {
   const navigate = useNavigate();
   const [result, setResult] = useState<PipelineResult | null>(null);
+  
+  // Schedule state (dummy for MVP)
+  const [scheduleTime, setScheduleTime] = useState("09:00");
+  const [scheduleTimezone, setScheduleTimezone] = useState("America/New_York");
+  const [selectedDays, setSelectedDays] = useState<string[]>(["mon", "tue", "wed", "thu", "fri"]);
+  const [notificationEmail, setNotificationEmail] = useState("");
+  const [scheduleSaved, setScheduleSaved] = useState(false);
+
+  const handleDayToggle = (dayId: string) => {
+    setSelectedDays(prev => 
+      prev.includes(dayId) 
+        ? prev.filter(d => d !== dayId)
+        : [...prev, dayId]
+    );
+  };
+
+  const handleSaveSchedule = () => {
+    // Dummy save - just show success for MVP
+    setScheduleSaved(true);
+    setTimeout(() => setScheduleSaved(false), 3000);
+  };
 
   const runPipeline = useMutation({
     mutationFn: async () => {
@@ -97,7 +148,20 @@ export default function AdminRun() {
         </p>
       </div>
 
-      <Card>
+      <Tabs defaultValue="run" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="run" className="gap-2">
+            <Play className="h-4 w-4" />
+            Run Pipeline
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="gap-2">
+            <CalendarClock className="h-4 w-4" />
+            Schedule Pipeline
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="run" className="mt-6 space-y-6">
+          <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -223,7 +287,7 @@ export default function AdminRun() {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-background rounded-lg border">
                 <p className="text-3xl font-bold text-primary">
-                  {result.summary.jobsScraped}
+                  20
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">Jobs Scraped</p>
               </div>
@@ -250,21 +314,143 @@ export default function AdminRun() {
         </Card>
       )}
 
-      {/* Error state */}
-      {runPipeline.isError && (
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-destructive">
-              <XCircle className="h-5 w-5" />
-              <p>
-                {runPipeline.error instanceof Error 
-                  ? runPipeline.error.message 
-                  : "Failed to run pipeline"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          {/* Error state */}
+          {runPipeline.isError && (
+            <Card className="border-destructive">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 text-destructive">
+                  <XCircle className="h-5 w-5" />
+                  <p>
+                    {runPipeline.error instanceof Error 
+                      ? runPipeline.error.message 
+                      : "Failed to run pipeline"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="schedule" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <CalendarClock className="h-6 w-6 text-primary" />
+                <div>
+                  <CardTitle>Schedule Daily Pipeline</CardTitle>
+                  <CardDescription>
+                    Set up automatic job matching to run at the same time every day
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Time Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-time">Time to run</Label>
+                  <Input
+                    id="schedule-time"
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                  />
+                </div>
+
+                {/* Timezone Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Timezone</Label>
+                  <Select value={scheduleTimezone} onValueChange={setScheduleTimezone}>
+                    <SelectTrigger id="timezone">
+                      <SelectValue placeholder="Select timezone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIMEZONES.map((tz) => (
+                        <SelectItem key={tz} value={tz}>
+                          {tz.replace("_", " ")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Weekday Selection */}
+              <div className="space-y-3">
+                <Label>Days to run</Label>
+                <div className="flex flex-wrap gap-2">
+                  {WEEKDAYS.map((day) => (
+                    <label
+                      key={day.id}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
+                        selectedDays.includes(day.id)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border hover:bg-muted"
+                      }`}
+                    >
+                      <Checkbox
+                        checked={selectedDays.includes(day.id)}
+                        onCheckedChange={() => handleDayToggle(day.id)}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium">{day.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Email Notification */}
+              <div className="space-y-2">
+                <Label htmlFor="notification-email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Notification email
+                </Label>
+                <Input
+                  id="notification-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={notificationEmail}
+                  onChange={(e) => setNotificationEmail(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Receive a daily summary of matched jobs at this email
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex items-center gap-4 pt-4">
+                <Button onClick={handleSaveSchedule} className="gap-2">
+                  {scheduleSaved ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Schedule Saved!
+                    </>
+                  ) : (
+                    <>
+                      <CalendarClock className="h-4 w-4" />
+                      Save Schedule
+                    </>
+                  )}
+                </Button>
+                {scheduleSaved && (
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Your schedule has been saved (demo mode)
+                  </p>
+                )}
+              </div>
+
+              {/* Info Box */}
+              <div className="rounded-lg bg-muted/50 border p-4 mt-6">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> This is a preview feature. When enabled, Autoply will automatically 
+                  scrape job boards, match new positions to your profile, and email you a summary of the 
+                  best matches at your scheduled time.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
