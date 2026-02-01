@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import OpenAI from "https://esm.sh/openai@4.52.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,33 +109,6 @@ interface PipelineStep {
   count?: number;
 }
 
-// Helper to call the Lovable AI Gateway
-async function callAI(apiKey: string, systemPrompt: string, userContent: string): Promise<string> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash-preview-05-20",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userContent },
-      ],
-      temperature: 0.3,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -143,10 +117,10 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const keywordsApiKey = Deno.env.get("KEYWORDSAI_API_KEY");
 
-    if (!lovableApiKey) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!keywordsApiKey) {
+      throw new Error("KEYWORDSAI_API_KEY is not configured");
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -174,6 +148,11 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Running daily pipeline for user: ${user.id}`);
+
+    const openai = new OpenAI({
+      baseURL: "https://api.keywordsai.co/api/",
+      apiKey: keywordsApiKey,
+    });
 
     const startTime = Date.now();
     const steps: PipelineStep[] = [
@@ -290,62 +269,62 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Step 2: Score fit for each job using Lovable AI Gateway
+    // Step 2: Score fit for each job
     steps[1].status = "running";
     console.log("Step 2: Scoring job fit...");
 
     const scoredMatches: any[] = [];
-    const fitThreshold = 70; // Lower threshold to ensure matches appear
-
-    const fitScorerPrompt = `You are a job fit scoring assistant. Analyze the candidate's resume and the job posting to determine how well they match.
-
-Output a JSON object with:
-- "score": number from 0-100 (be generous - 80+ means great fit, 60-79 is decent, below 60 is poor fit)
-- "reasons": object with "strengths" (array of why they're a good fit) and "gaps" (array of potential concerns)
-
-Consider:
-- Skills match (technical skills, programming languages, frameworks)
-- Experience level (internships/projects count for interns)
-- Location/remote preferences
-- Education level
-
-Be generous with scoring - if someone has relevant experience in the field, score them 75+.`;
+    const fitThreshold = 70; // Only draft for jobs with score >= 70
 
     for (const job of unmatchedJobs) {
       try {
         console.log(`Scoring: ${job.title} at ${job.company}`);
         
-        const userContent = JSON.stringify({
-          resume: resume.resume_text,
-          job: {
-            title: job.title,
-            company: job.company,
-            location: job.location,
-            description: job.description,
-          },
-          preferences: {
-            roles: preferences.roles,
-            locations: preferences.locations,
-            remote_ok: preferences.remote_ok,
-            sponsorship_needed: preferences.sponsorship_needed,
-          },
+        const fitResponse = await openai.chat.completions.create({
+          model: "fit_scorer_v1",
+          messages: [
+            {
+              role: "user",
+              content: JSON.stringify({
+                resume: resume.resume_text,
+                job: {
+                  title: job.title,
+                  company: job.company,
+                  location: job.location,
+                  description: job.description,
+                },
+                preferences: {
+                  roles: preferences.roles,
+                  locations: preferences.locations,
+                  remote_ok: preferences.remote_ok,
+                  sponsorship_needed: preferences.sponsorship_needed,
+                  min_salary: preferences.min_salary,
+                },
+                profile: profile ? {
+                  graduation_date: profile.graduation_date,
+                  work_authorization: profile.work_authorization,
+                } : null,
+              }),
+            },
+          ],
         });
 
-        const fitContent = await callAI(lovableApiKey, fitScorerPrompt, userContent);
-        
-        let fitScore = 75; // Default to a decent score
+        let fitScore = 75;
         let reasons: any = {};
+        
+        const fitContent = fitResponse.choices[0]?.message?.content || "{}";
+        console.log(`Fit response for ${job.title}:`, fitContent.substring(0, 200));
         
         try {
           // Try to extract JSON from response (may have markdown code blocks)
           const jsonMatch = fitContent.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            fitScore = parsed.score || 75;
-            reasons = parsed.reasons || {};
+            fitScore = parsed.score || parsed.fit_score || 75;
+            reasons = parsed.reasons || parsed;
           }
         } catch (parseError) {
-          console.log("JSON parse failed, using default score:", fitContent.substring(0, 200));
+          console.log("JSON parse failed, using default score");
         }
 
         // Normalize score
@@ -390,52 +369,60 @@ Be generous with scoring - if someone has relevant experience in the field, scor
 
     let draftsCreated = 0;
 
-    const applicationGeneratorPrompt = `You are an application drafting assistant. Create a compelling cover letter and answer common application questions based on the candidate's resume and the job posting.
-
-Output a JSON object with:
-- "cover_letter": string - A professional, personalized cover letter (3-4 paragraphs)
-- "answers": object with common application question answers:
-  - "why_interested": Why are you interested in this role?
-  - "relevant_experience": Describe relevant experience
-  - "technical_skills": List relevant technical skills
-  - "availability": Start date availability (assume "immediately" or "May 2026" for students)
-- "confidence": number 0-1 (how confident the draft is complete)
-
-Make the cover letter specific to the company and role. Reference specific projects and skills from the resume.`;
-
     for (const { match, job } of scoredMatches) {
       try {
         console.log(`Generating draft for: ${job.title}`);
         
-        const userContent = JSON.stringify({
-          resume: resume.resume_text,
-          job: {
-            title: job.title,
-            company: job.company,
-            location: job.location,
-            description: job.description,
-          },
-          profile: profile ? {
-            full_name: profile.full_name,
-            graduation_date: profile.graduation_date,
-            work_authorization: profile.work_authorization,
-          } : null,
+        const draftResponse = await openai.chat.completions.create({
+          model: "application_generator_v1",
+          messages: [
+            {
+              role: "user",
+              content: JSON.stringify({
+                resume: resume.resume_text,
+                job: {
+                  title: job.title,
+                  company: job.company,
+                  location: job.location,
+                  description: job.description,
+                },
+                profile: profile ? {
+                  full_name: profile.full_name,
+                  graduation_date: profile.graduation_date,
+                  work_authorization: profile.work_authorization,
+                  gender: profile.gender,
+                  race: profile.race,
+                  other_info: profile.other_info,
+                } : null,
+              }),
+            },
+          ],
         });
-
-        const draftContent = await callAI(lovableApiKey, applicationGeneratorPrompt, userContent);
 
         let coverLetter = "";
         let answersJson: any = {};
         let confidence = 1.0;
         let issues: string[] = [];
         
+        const draftContent = draftResponse.choices[0]?.message?.content || "";
+        console.log(`Draft response for ${job.title}:`, draftContent.substring(0, 200));
+        
         try {
+          // Try to extract JSON from response
           const jsonMatch = draftContent.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
-            coverLetter = parsed.cover_letter || "";
+            coverLetter = parsed.cover_letter || parsed.coverLetter || "";
             answersJson = parsed.answers || {};
             confidence = parsed.confidence ?? 0.9;
+            issues = parsed.issues || [];
+            
+            // Check for "NEEDS USER INPUT" markers
+            if (coverLetter.includes("NEEDS USER INPUT") || 
+                Object.values(answersJson).some(v => String(v).includes("NEEDS USER INPUT"))) {
+              issues.push("Some fields need user review");
+              confidence = Math.min(confidence, 0.5);
+            }
           } else {
             // If no JSON, treat the whole response as cover letter
             coverLetter = draftContent;
@@ -466,10 +453,12 @@ Make the cover letter specific to the company and role. Reference specific proje
               generated_at: new Date().toISOString(),
               confidence,
               issues,
-              model: "google/gemini-2.5-flash-preview-05-20",
+              prompt_name: "application_generator_v1",
+              model: "keywords_ai",
             },
             version_meta: {
               version: 1,
+              prompt_name: "application_generator_v1",
             },
           });
 
