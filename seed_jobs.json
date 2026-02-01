@@ -178,5 +178,14 @@
     "source": "indeed",
     "url": "https://salesforce.com/careers/sde-intern-2026",
     "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Software Engineer Intern",
+    "company": "Ramp",
+    "location": "New York, NY",
+    "description": "Join Ramp to build the future of corporate finance. Work on our spend management platform used by 25,000+ businesses. You'll ship real features to production and work with a world-class engineering team. Requirements: Strong CS fundamentals, experience with TypeScript, Python, or Go, passion for fintech and startups.",
+    "source": "linkedin",
+    "url": "https://ramp.com/careers/swe-intern-2026",
+    "date_posted": "2026-02-01"
   }
 ]
