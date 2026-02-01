@@ -35,13 +35,6 @@
 
 ---
 
-## ⚠️ Notes
-- This is a **demo-ready MVP**  
-- Applications submit to a **mock endpoint** for reliability  
-- No email, SMS, or real ATS integration (by design)  
-
----
-
 ## 🎬 Demo Flow
 1. Onboard with resume + preferences  
 2. Run pipeline  
