@@ -1,4 +1,4 @@
-import { Inbox, FileEdit, Settings, Play, Zap, LogOut } from "lucide-react";
+import { Inbox, Settings, Play, Zap, LogOut, Activity } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -22,6 +22,7 @@ const mainNavItems = [
 
 const adminNavItems = [
   { title: "Run Pipeline", url: "/admin/run", icon: Play },
+  { title: "System Status", url: "/status", icon: Activity },
 ];
 
 export function AppSidebar() {

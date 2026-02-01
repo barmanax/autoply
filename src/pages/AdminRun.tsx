@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,8 @@ import {
   Search,
   Target,
   FileText,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from "lucide-react";
 
 interface PipelineStep {
@@ -28,16 +29,17 @@ interface PipelineStep {
 interface PipelineResult {
   steps: PipelineStep[];
   summary: {
-    jobsScraped: number;
-    matchesFound: number;
+    jobsCollected: number;
+    matchesScored: number;
     draftsCreated: number;
     duration: number;
   };
+  message?: string;
 }
 
 const stepIcons: Record<string, typeof Search> = {
-  scrape: Search,
-  match: Target,
+  collect: Search,
+  score: Target,
   draft: FileText,
 };
 
@@ -45,18 +47,43 @@ export default function AdminRun() {
   const navigate = useNavigate();
   const [result, setResult] = useState<PipelineResult | null>(null);
 
+  // Check onboarding status
+  const { data: onboardingStatus } = useQuery({
+    queryKey: ["onboarding-status"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { complete: false, missing: ["auth"] };
+
+      const [resumeResult, prefsResult] = await Promise.all([
+        supabase.from("resumes").select("id").eq("user_id", user.id).limit(1),
+        supabase.from("preferences").select("roles").eq("user_id", user.id).limit(1),
+      ]);
+
+      const hasResume = (resumeResult.data?.length ?? 0) > 0;
+      const hasPreferences = (prefsResult.data?.length ?? 0) > 0 && 
+        (prefsResult.data?.[0]?.roles?.length ?? 0) > 0;
+
+      const missing: string[] = [];
+      if (!hasResume) missing.push("resume");
+      if (!hasPreferences) missing.push("preferences");
+
+      return { complete: missing.length === 0, missing };
+    },
+  });
+
   const runPipeline = useMutation({
     mutationFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase.functions.invoke("run-pipeline", {
+      const { data, error } = await supabase.functions.invoke("run-daily", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
       return data as PipelineResult;
     },
     onSuccess: (data) => {
@@ -78,7 +105,7 @@ export default function AdminRun() {
   };
 
   const getProgressValue = () => {
-    if (!result?.steps) return 0;
+    if (!result?.steps) return runPipeline.isPending ? 33 : 0;
     const completed = result.steps.filter(s => s.status === "completed").length;
     return (completed / result.steps.length) * 100;
   };
@@ -88,14 +115,38 @@ export default function AdminRun() {
     return `${(ms / 1000).toFixed(1)}s`;
   };
 
+  const canRun = onboardingStatus?.complete && !runPipeline.isPending;
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Run Pipeline</h1>
+        <h1 className="text-3xl font-bold">Check Today's Open Roles</h1>
         <p className="text-muted-foreground mt-1">
-          Trigger and monitor the job matching pipeline
+          Find jobs, score fit, and generate application drafts
         </p>
       </div>
+
+      {/* Onboarding Warning */}
+      {onboardingStatus && !onboardingStatus.complete && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <div className="flex-1">
+                <p className="font-medium text-amber-800 dark:text-amber-200">
+                  Complete your profile before running the pipeline
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  Missing: {onboardingStatus.missing.join(", ")}
+                </p>
+              </div>
+              <Button variant="outline" onClick={() => navigate("/onboarding")}>
+                Complete Setup
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -105,7 +156,7 @@ export default function AdminRun() {
               <div>
                 <CardTitle>Pipeline Controls</CardTitle>
                 <CardDescription>
-                  Scrape jobs, match to your profile, and generate drafts
+                  Collect jobs, score fit, and generate application drafts
                 </CardDescription>
               </div>
             </div>
@@ -114,7 +165,7 @@ export default function AdminRun() {
                 setResult(null);
                 runPipeline.mutate();
               }}
-              disabled={runPipeline.isPending}
+              disabled={!canRun}
               size="lg"
             >
               {runPipeline.isPending ? (
@@ -146,10 +197,10 @@ export default function AdminRun() {
             {/* Steps */}
             <div className="space-y-3">
               {(result?.steps || [
-                { id: "scrape", name: "Scraping job boards", status: "pending" as const },
-                { id: "match", name: "Matching jobs to profile", status: "pending" as const },
-                { id: "draft", name: "Generating application drafts", status: "pending" as const },
-              ]).map((step, index) => {
+                { id: "collect", name: "Collecting jobs", status: runPipeline.isPending ? "running" as const : "pending" as const },
+                { id: "score", name: "Scoring fit", status: "pending" as const },
+                { id: "draft", name: "Drafting applications", status: "pending" as const },
+              ]).map((step) => {
                 const Icon = stepIcons[step.id] || Search;
                 return (
                   <div
@@ -223,15 +274,15 @@ export default function AdminRun() {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-background rounded-lg border">
                 <p className="text-3xl font-bold text-primary">
-                  {result.summary.jobsScraped}
+                  {result.summary.jobsCollected}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">Jobs Scraped</p>
+                <p className="text-sm text-muted-foreground mt-1">Jobs Collected</p>
               </div>
               <div className="text-center p-4 bg-background rounded-lg border">
                 <p className="text-3xl font-bold text-primary">
-                  {result.summary.matchesFound}
+                  {result.summary.matchesScored}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">Matches Found</p>
+                <p className="text-sm text-muted-foreground mt-1">High Matches</p>
               </div>
               <div className="text-center p-4 bg-background rounded-lg border">
                 <p className="text-3xl font-bold text-primary">
@@ -240,6 +291,11 @@ export default function AdminRun() {
                 <p className="text-sm text-muted-foreground mt-1">Drafts Created</p>
               </div>
             </div>
+            {result.message && (
+              <p className="mt-4 text-sm text-muted-foreground text-center">
+                {result.message}
+              </p>
+            )}
             <div className="mt-6 flex justify-center">
               <Button onClick={() => navigate("/inbox")} className="gap-2">
                 Go to Inbox
