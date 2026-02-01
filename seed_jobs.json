@@ -9,12 +9,12 @@
     "date_posted": "2026-02-01"
   },
   {
-    "title": "SWE Intern - Summer 2026",
-    "company": "Meta",
-    "location": "Menlo Park, CA",
-    "description": "Build products that connect billions of people. You'll work alongside experienced engineers on real projects. Looking for students with experience in mobile development, systems programming, or machine learning. Must be enrolled in a BS/MS/PhD program.",
+    "title": "Data Science Intern",
+    "company": "Google",
+    "location": "New York, NY",
+    "description": "Apply data science and machine learning to solve complex business problems at scale. Work with petabytes of data to drive product decisions. Requirements: Pursuing MS/PhD in Statistics, CS, or related field, proficiency in Python and SQL, experience with ML frameworks.",
     "source": "linkedin",
-    "url": "https://metacareers.com/jobs/swe-intern-2026",
+    "url": "https://careers.google.com/jobs/intern-ds-2026",
     "date_posted": "2026-02-01"
   },
   {
@@ -27,12 +27,48 @@
     "date_posted": "2026-02-01"
   },
   {
+    "title": "Data Science Intern",
+    "company": "Amazon",
+    "location": "Arlington, VA",
+    "description": "Use statistical modeling and machine learning to improve customer experience across Amazon. Work on recommendation systems, forecasting, and natural language processing. Requirements: MS/PhD in quantitative field, Python and SQL proficiency, experience with ML/statistical modeling.",
+    "source": "linkedin",
+    "url": "https://amazon.jobs/ds-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "SWE Intern - Summer 2026",
+    "company": "Meta",
+    "location": "Menlo Park, CA",
+    "description": "Build products that connect billions of people. You'll work alongside experienced engineers on real projects. Looking for students with experience in mobile development, systems programming, or machine learning. Must be enrolled in a BS/MS/PhD program.",
+    "source": "linkedin",
+    "url": "https://metacareers.com/jobs/swe-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Data Scientist Intern",
+    "company": "Meta",
+    "location": "New York, NY",
+    "description": "Drive product and business decisions through rigorous data analysis and experimentation. Work on ads, integrity, or core product analytics. Requirements: Pursuing advanced degree in Statistics, Economics, or CS, strong SQL and Python skills, experience with A/B testing.",
+    "source": "linkedin",
+    "url": "https://metacareers.com/jobs/ds-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
     "title": "Software Engineering Intern",
     "company": "Apple",
     "location": "Cupertino, CA",
     "description": "Create the next generation of Apple products. Join teams working on iOS, macOS, or hardware/software integration. Looking for passion for technology, strong programming fundamentals, and creative problem-solving abilities.",
     "source": "glassdoor",
     "url": "https://jobs.apple.com/swe-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Machine Learning / AI Intern",
+    "company": "Apple",
+    "location": "Seattle, WA",
+    "description": "Work on Siri, computer vision, and ML infrastructure powering Apple devices. Build models that run efficiently on device. Requirements: Pursuing MS/PhD in ML/AI, experience with PyTorch or TensorFlow, strong math and programming skills.",
+    "source": "linkedin",
+    "url": "https://jobs.apple.com/ml-intern-2026",
     "date_posted": "2026-02-01"
   },
   {
@@ -45,6 +81,33 @@
     "date_posted": "2026-02-01"
   },
   {
+    "title": "Data & Applied Science Intern",
+    "company": "Microsoft",
+    "location": "Redmond, WA",
+    "description": "Apply machine learning and data science to improve Microsoft products. Work on search, recommendations, and intelligent features. Requirements: Pursuing MS/PhD in CS, Statistics, or related field, experience with Python, R, and ML frameworks.",
+    "source": "linkedin",
+    "url": "https://careers.microsoft.com/das-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Software Engineering Intern",
+    "company": "Netflix",
+    "location": "Los Gatos, CA",
+    "description": "Build the streaming platform that entertains 250M+ members worldwide. Work on personalization, streaming infrastructure, or studio technology. Requirements: Strong CS fundamentals, experience with Java, Python, or JavaScript.",
+    "source": "linkedin",
+    "url": "https://jobs.netflix.com/swe-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Data Science Intern",
+    "company": "Netflix",
+    "location": "Los Angeles, CA",
+    "description": "Use data to shape content strategy and improve member experience. Work on causal inference, experimentation, and ML models. Requirements: Pursuing advanced degree in Statistics or related field, Python and SQL proficiency, strong communication skills.",
+    "source": "linkedin",
+    "url": "https://jobs.netflix.com/ds-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
     "title": "Backend Engineering Intern",
     "company": "Stripe",
     "location": "San Francisco, CA",
@@ -54,66 +117,30 @@
     "date_posted": "2026-02-01"
   },
   {
-    "title": "Software Engineering Intern",
-    "company": "Airbnb",
-    "location": "San Francisco, CA",
-    "description": "Help create a world where anyone can belong anywhere. Work on the platform powering millions of stays. Requirements: Strong CS fundamentals, experience with web technologies (React, Node.js), passion for travel and community.",
-    "source": "indeed",
-    "url": "https://careers.airbnb.com/swe-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Full Stack Engineering Intern",
-    "company": "Figma",
-    "location": "San Francisco, CA",
-    "description": "Build the future of design tools. Work on our web-based collaborative design platform using TypeScript, React, and WebGL. Looking for students passionate about design, performance optimization, and real-time collaboration.",
+    "title": "Data Scientist Intern",
+    "company": "Stripe",
+    "location": "South San Francisco, CA",
+    "description": "Use data to detect fraud, optimize pricing, and improve the Stripe platform. Work on ML models that process billions of transactions. Requirements: Pursuing degree in quantitative field, Python and SQL skills, ML experience.",
     "source": "linkedin",
-    "url": "https://figma.com/careers/fullstack-intern-2026",
+    "url": "https://stripe.com/jobs/ds-intern-2026",
     "date_posted": "2026-02-01"
   },
   {
     "title": "Software Engineering Intern",
-    "company": "Notion",
-    "location": "San Francisco, CA",
-    "description": "Help build the all-in-one workspace. Work on features used by millions of teams worldwide. Requirements: Strong programming skills, experience with React or similar frameworks, interest in productivity tools.",
-    "source": "glassdoor",
-    "url": "https://notion.so/careers/swe-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Platform Engineering Intern",
-    "company": "Databricks",
-    "location": "San Francisco, CA",
-    "description": "Work on the unified analytics platform. Build infrastructure that processes petabytes of data. Requirements: Experience with Scala, Python, or Java, understanding of distributed systems, interest in big data and ML.",
+    "company": "Nvidia",
+    "location": "Santa Clara, CA",
+    "description": "Work on GPU computing, AI infrastructure, and deep learning frameworks. Build technology powering the AI revolution. Requirements: Strong C/C++ skills, CUDA experience a plus, pursuing degree in CS or EE.",
     "source": "linkedin",
-    "url": "https://databricks.com/careers/platform-intern-2026",
+    "url": "https://nvidia.com/careers/swe-intern-2026",
     "date_posted": "2026-02-01"
   },
   {
-    "title": "Software Engineering Intern",
-    "company": "Coinbase",
-    "location": "Remote",
-    "description": "Build the future of finance. Work on the platform that makes crypto accessible to everyone. Requirements: Strong coding skills, interest in blockchain technology, experience with Go, Python, or TypeScript.",
-    "source": "indeed",
-    "url": "https://coinbase.com/careers/swe-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Frontend Engineering Intern",
-    "company": "Vercel",
-    "location": "Remote",
-    "description": "Build the frontend cloud. Work on Next.js and the Vercel platform used by millions of developers. Requirements: Strong React/Next.js skills, understanding of web performance, passion for developer experience.",
+    "title": "Deep Learning Data Scientist Intern",
+    "company": "Nvidia",
+    "location": "Santa Clara, CA",
+    "description": "Push the boundaries of AI research and apply it to real products. Work on LLMs, computer vision, and autonomous systems. Requirements: Pursuing MS/PhD in ML/AI, publications preferred, PyTorch experience required.",
     "source": "linkedin",
-    "url": "https://vercel.com/careers/frontend-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Software Engineering Intern",
-    "company": "Robinhood",
-    "location": "Menlo Park, CA",
-    "description": "Democratize finance for all. Build trading infrastructure and mobile apps used by millions. Requirements: Strong algorithms and data structures, experience with Python or Go, interest in fintech.",
-    "source": "glassdoor",
-    "url": "https://robinhood.com/careers/swe-intern-2026",
+    "url": "https://nvidia.com/careers/dl-intern-2026",
     "date_posted": "2026-02-01"
   },
   {
@@ -127,56 +154,29 @@
   },
   {
     "title": "Software Engineering Intern",
-    "company": "Palantir",
-    "location": "New York, NY",
-    "description": "Build software that solves the world's hardest problems. Work on platforms used by governments and enterprises. Requirements: Strong problem-solving skills, experience with Java or Python, ability to work on complex systems.",
+    "company": "Databricks",
+    "location": "San Francisco, CA",
+    "description": "Build the unified analytics platform. Work on infrastructure that processes petabytes of data. Requirements: Experience with Scala, Python, or Java, understanding of distributed systems, interest in big data and ML.",
     "source": "linkedin",
-    "url": "https://palantir.com/careers/swe-intern-2026",
+    "url": "https://databricks.com/careers/swe-intern-2026",
     "date_posted": "2026-02-01"
   },
   {
-    "title": "Infrastructure Engineering Intern",
-    "company": "Cloudflare",
+    "title": "Data Science Intern",
+    "company": "Airbnb",
     "location": "San Francisco, CA",
-    "description": "Help build a better internet. Work on the network that powers 25M+ websites. Requirements: Systems programming experience, understanding of networking, Go or Rust experience preferred.",
+    "description": "Use data to improve the travel experience for millions of guests and hosts. Work on search ranking, pricing algorithms, and experimentation. Requirements: Pursuing advanced degree, strong SQL and Python, statistical modeling experience.",
+    "source": "linkedin",
+    "url": "https://careers.airbnb.com/ds-intern-2026",
+    "date_posted": "2026-02-01"
+  },
+  {
+    "title": "Software Development Engineer Intern",
+    "company": "Salesforce",
+    "location": "San Francisco, CA",
+    "description": "Build the #1 CRM platform used by companies worldwide. Work on cloud infrastructure, AI features, or core platform. Requirements: Pursuing CS degree, Java or Python experience, strong problem-solving skills.",
     "source": "indeed",
-    "url": "https://cloudflare.com/careers/infra-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Software Engineering Intern",
-    "company": "Discord",
-    "location": "San Francisco, CA",
-    "description": "Build the platform where communities come alive. Work on real-time communication at scale. Requirements: Experience with Python, Rust, or Elixir, interest in gaming and community platforms.",
-    "source": "linkedin",
-    "url": "https://discord.com/careers/swe-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Mobile Engineering Intern",
-    "company": "Uber",
-    "location": "San Francisco, CA",
-    "description": "Build apps used by millions of riders and drivers worldwide. Work on iOS or Android development with cutting-edge technology. Requirements: Swift or Kotlin experience, mobile development portfolio.",
-    "source": "glassdoor",
-    "url": "https://uber.com/careers/mobile-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Software Engineering Intern",
-    "company": "Shopify",
-    "location": "Remote",
-    "description": "Help millions of entrepreneurs start and grow their businesses. Work on the commerce platform that powers 10% of US e-commerce. Requirements: Ruby, Python, or JavaScript experience, interest in entrepreneurship.",
-    "source": "linkedin",
-    "url": "https://shopify.com/careers/swe-intern-2026",
-    "date_posted": "2026-02-01"
-  },
-  {
-    "title": "Backend Engineering Intern",
-    "company": "Plaid",
-    "location": "San Francisco, CA",
-    "description": "Build the infrastructure that connects fintech apps to financial institutions. Work on APIs used by thousands of companies. Requirements: Strong backend skills, Python or Go experience, interest in fintech.",
-    "source": "indeed",
-    "url": "https://plaid.com/careers/backend-intern-2026",
+    "url": "https://salesforce.com/careers/sde-intern-2026",
     "date_posted": "2026-02-01"
   }
 ]
