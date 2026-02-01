@@ -10,6 +10,7 @@ import Onboarding from "./pages/Onboarding";
 import Inbox from "./pages/Inbox";
 import Draft from "./pages/Draft";
 import AdminRun from "./pages/AdminRun";
+import SystemStatus from "./pages/SystemStatus";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,14 @@ const App = () => (
               element={
                 <AppLayout>
                   <AdminRun />
+                </AppLayout>
+              }
+            />
+            <Route
+              path="/status"
+              element={
+                <AppLayout>
+                  <SystemStatus />
                 </AppLayout>
               }
             />

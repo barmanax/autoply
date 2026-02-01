@@ -18,14 +18,34 @@ import {
   X, 
   Pencil,
   ArrowLeft,
-  Loader2
+  Loader2,
+  AlertCircle,
+  Lightbulb
 } from "lucide-react";
+
+type FitReasons = {
+  skills_match?: number;
+  location_match?: number;
+  experience_match?: number;
+  overall?: string;
+  strengths?: string[];
+  gaps?: string[];
+  [key: string]: unknown;
+};
+
+type TailoringNotes = {
+  generated_at?: string;
+  confidence?: number;
+  issues?: string[];
+  prompt_name?: string;
+  [key: string]: unknown;
+};
 
 type JobMatch = {
   id: string;
   fit_score: number | null;
   status: string | null;
-  reasons: string[] | null;
+  reasons: FitReasons | null;
   job_posts: {
     id: string;
     title: string | null;
@@ -40,7 +60,7 @@ type ApplicationDraft = {
   id: string;
   cover_letter: string | null;
   answers_json: Record<string, string> | null;
-  tailoring_notes: Record<string, string> | null;
+  tailoring_notes: TailoringNotes | null;
 };
 
 export default function Draft() {
@@ -106,7 +126,7 @@ export default function Draft() {
     }
   }, [draft]);
 
-  // Update draft mutation
+  // Update draft mutation (saves cover letter and answers)
   const updateDraftMutation = useMutation({
     mutationFn: async (data: { cover_letter: string; answers_json: Record<string, string> }) => {
       if (draft?.id) {
@@ -139,26 +159,72 @@ export default function Draft() {
     },
   });
 
-  // Update match status mutation
-  const updateStatusMutation = useMutation({
-    mutationFn: async (status: string) => {
-      const { error } = await supabase
-        .from("job_matches")
-        .update({ status })
-        .eq("id", matchId!);
+  // Approve mutation - calls the approve edge function
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke("approve", {
+        body: { 
+          matchId, 
+          coverLetter,
+          answersJson: answers,
+        },
+      });
+
       if (error) throw error;
+      return data;
     },
-    onSuccess: (_, status) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["job-matches"] });
       queryClient.invalidateQueries({ queryKey: ["job-match", matchId] });
       toast({ 
-        title: status === "APPLIED" ? "Approved!" : "Skipped", 
-        description: status === "APPLIED" ? "Application marked as approved." : "Job skipped." 
+        title: "Application Approved!", 
+        description: "Your application has been marked as submitted." 
       });
       navigate("/inbox");
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to update status.", variant: "destructive" });
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: error instanceof Error ? error.message : "Failed to approve application.", 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  // Skip mutation - calls the skip edge function
+  const skipMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke("skip", {
+        body: { 
+          matchId,
+          reason: "User skipped from draft review",
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["job-matches"] });
+      queryClient.invalidateQueries({ queryKey: ["job-match", matchId] });
+      toast({ 
+        title: "Job Skipped", 
+        description: "This job has been removed from your inbox." 
+      });
+      navigate("/inbox");
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Error", 
+        description: error instanceof Error ? error.message : "Failed to skip job.", 
+        variant: "destructive" 
+      });
     },
   });
 
@@ -167,15 +233,18 @@ export default function Draft() {
   };
 
   const handleApprove = () => {
-    updateStatusMutation.mutate("APPLIED");
+    approveMutation.mutate();
   };
 
   const handleSkip = () => {
-    updateStatusMutation.mutate("SKIPPED");
+    skipMutation.mutate();
   };
 
   const isLoading = matchLoading || draftLoading;
-  const isSaving = updateDraftMutation.isPending || updateStatusMutation.isPending;
+  const isSaving = updateDraftMutation.isPending || approveMutation.isPending || skipMutation.isPending;
+  const needsReview = match?.status === "NEEDS_REVIEW";
+  const tailoringNotes = draft?.tailoring_notes as TailoringNotes | null;
+  const fitReasons = match?.reasons as FitReasons | null;
 
   if (matchError) {
     return (
@@ -230,7 +299,11 @@ export default function Draft() {
           ) : (
             <>
               <Button variant="outline" onClick={handleSkip} disabled={isSaving}>
-                <X className="h-4 w-4 mr-2" />
+                {skipMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <X className="h-4 w-4 mr-2" />
+                )}
                 Skip
               </Button>
               <Button variant="outline" onClick={() => setIsEditing(true)} disabled={isSaving}>
@@ -238,14 +311,40 @@ export default function Draft() {
                 Edit
               </Button>
               <Button onClick={handleApprove} disabled={isSaving}>
-                {updateStatusMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Check className="h-4 w-4 mr-2" />
+                {approveMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4 mr-2" />
+                )}
                 Approve
               </Button>
             </>
           )}
         </div>
       </div>
+
+      {/* Needs Review Warning */}
+      {needsReview && (
+        <Card className="border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5" />
+              <div>
+                <p className="font-medium text-orange-800 dark:text-orange-200">
+                  This application needs your review
+                </p>
+                {tailoringNotes?.issues && tailoringNotes.issues.length > 0 && (
+                  <ul className="text-sm text-orange-700 dark:text-orange-300 mt-1 list-disc list-inside">
+                    {tailoringNotes.issues.map((issue, i) => (
+                      <li key={i}>{issue}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Job Info Card */}
       <Card>
@@ -282,11 +381,19 @@ export default function Draft() {
                 <Skeleton className="h-6 w-20" />
               ) : (
                 <>
-                  <Badge variant="secondary">{match?.status || "DRAFTED"}</Badge>
+                  <Badge variant={match?.status === "NEEDS_REVIEW" ? "outline" : "secondary"}>
+                    {match?.status || "DRAFTED"}
+                  </Badge>
                   {match?.fit_score && (
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">Fit</p>
-                      <p className="font-bold text-lg">{match.fit_score}%</p>
+                      <p className={`font-bold text-lg ${
+                        match.fit_score >= 80 ? "text-green-600 dark:text-green-400" :
+                        match.fit_score >= 60 ? "text-yellow-600 dark:text-yellow-400" :
+                        "text-red-600 dark:text-red-400"
+                      }`}>
+                        {match.fit_score}%
+                      </p>
                     </div>
                   )}
                   {match?.job_posts?.url && (
@@ -309,6 +416,80 @@ export default function Draft() {
           </CardContent>
         )}
       </Card>
+
+      {/* Fit Reasons Card */}
+      {fitReasons && Object.keys(fitReasons).length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Lightbulb className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">Why This Job Matches</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Score breakdowns */}
+              <div className="grid grid-cols-3 gap-4">
+                {fitReasons.skills_match !== undefined && (
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-primary">{fitReasons.skills_match}%</p>
+                    <p className="text-xs text-muted-foreground">Skills Match</p>
+                  </div>
+                )}
+                {fitReasons.location_match !== undefined && (
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-primary">{fitReasons.location_match}%</p>
+                    <p className="text-xs text-muted-foreground">Location Match</p>
+                  </div>
+                )}
+                {fitReasons.experience_match !== undefined && (
+                  <div className="text-center p-3 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-primary">{fitReasons.experience_match}%</p>
+                    <p className="text-xs text-muted-foreground">Experience Match</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Strengths */}
+              {fitReasons.strengths && fitReasons.strengths.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Strengths</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    {fitReasons.strengths.map((s, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Gaps */}
+              {fitReasons.gaps && fitReasons.gaps.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Potential Gaps</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    {fitReasons.gaps.map((g, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
+                        {g}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Overall summary */}
+              {fitReasons.overall && (
+                <p className="text-sm text-muted-foreground border-t pt-4">
+                  {fitReasons.overall}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Application Draft Card */}
       <Card>

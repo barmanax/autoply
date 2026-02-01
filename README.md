@@ -1,73 +1,120 @@
-# Welcome to your Lovable project
+# Autoply - AI-Powered Job Application Assistant
 
-## Project info
+Autoply is a job application management platform that uses AI to match jobs to your profile, score fit, and generate personalized application drafts.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Resume Upload**: Upload your resume (PDF or paste text)
+- **Profile Setup**: Set your preferences for job roles, locations, remote work, and salary
+- **AI-Powered Matching**: Automatically matches jobs to your profile using AI
+- **Fit Scoring**: Each job gets a fit score based on your resume and preferences
+- **Draft Generation**: AI generates cover letters and application answers
+- **Review & Approve**: Review drafts, edit if needed, then approve or skip
 
-There are several ways of editing your application.
+## Demo Flow
 
-**Use Lovable**
+1. **Sign up/Login** at `/auth`
+2. **Complete Onboarding** at `/onboarding`:
+   - Upload/paste your resume
+   - Fill in profile details (graduation, work authorization)
+   - Set job preferences (roles, locations, remote, salary)
+3. **Run the Pipeline** at `/admin/run`:
+   - Click "Run Pipeline" to find and match jobs
+   - Pipeline: Collect jobs → Score fit → Generate drafts
+4. **Review Drafts** at `/inbox`:
+   - See matched jobs sorted by fit score
+   - Click a job to review the draft
+5. **Approve/Skip** at `/draft/:matchId`:
+   - Review cover letter and answers
+   - Edit if needed
+   - Approve to submit or Skip to dismiss
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Local Development
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd <project-folder>
 
-**Use your preferred IDE**
+# Install dependencies
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Required Environment Variables
 
-**Use GitHub Codespaces**
+### Frontend (.env)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+```
 
-## What technologies are used for this project?
+### Backend (Supabase Secrets)
 
-This project is built with:
+These are set in the Supabase dashboard under Project Settings > Edge Functions > Secrets:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+SUPABASE_SERVICE_ROLE_KEY    # Auto-provided by Supabase
+KEYWORDSAI_API_KEY           # Your Keywords AI API key
+```
 
-## How can I deploy this project?
+## Keywords AI Integration
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Autoply uses [Keywords AI](https://keywordsai.co) as the LLM gateway for all AI operations. The integration uses the OpenAI SDK routed through Keywords AI:
 
-## Can I connect a custom domain to my Lovable project?
+```typescript
+const openai = new OpenAI({
+  baseURL: "https://api.keywordsai.co/api/",
+  apiKey: process.env.KEYWORDSAI_API_KEY,
+});
+```
 
-Yes, you can!
+### Prompt Names Used
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. **fit_scorer_v1**: Scores how well a job matches the user's resume and preferences
+   - Input: Resume, job details, preferences
+   - Output: Fit score (0-100), reasons, strengths, gaps
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+2. **application_generator_v1**: Generates cover letters and application answers
+   - Input: Resume, job details, profile info
+   - Output: Cover letter, answers JSON, confidence score
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (Auth, Database, Edge Functions, Storage)
+- **AI**: Keywords AI Gateway (OpenAI-compatible API)
+
+## Database Tables
+
+- `profiles` - User profile info (graduation, work auth, demographics)
+- `resumes` - Stored resume text and file paths
+- `preferences` - Job search preferences (roles, locations, salary)
+- `job_posts` - Job listings (loaded from seed_jobs.json)
+- `job_matches` - User-job matches with fit scores
+- `application_drafts` - Generated cover letters and answers
+- `submission_events` - Record of approved applications
+
+## API Endpoints (Edge Functions)
+
+- `POST /run-daily` - Run the full pipeline (collect, score, draft)
+- `POST /approve` - Approve an application (set status to APPLIED)
+- `POST /skip` - Skip a job (set status to SKIPPED)
+- `POST /seed-jobs` - Seed database with demo jobs
+
+## System Status
+
+Visit `/status` to check system health:
+- Supabase connection
+- Environment variables
+- AI gateway connectivity
+- Authentication status
