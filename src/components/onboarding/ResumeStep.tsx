@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { FileText, ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
+import { FileText, ArrowRight, Upload, Loader2, CheckCircle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { DEMO_RESUME_TEXT } from "@/lib/demo-data";
 import * as pdfjsLib from "pdfjs-dist";
 
 // Set up the worker
@@ -126,6 +127,24 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Demo Button */}
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full"
+          onClick={() => {
+            setResumeText(DEMO_RESUME_TEXT);
+            setUploadedFileName("demo_resume.pdf");
+            toast({
+              title: "Demo resume loaded",
+              description: "Resume pre-filled with demo data.",
+            });
+          }}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Load Demo Resume
+        </Button>
+
         {/* PDF Upload */}
         <div className="space-y-2">
           <Label>Resume PDF (optional)</Label>

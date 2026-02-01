@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, ArrowRight, ArrowLeft } from "lucide-react";
+import { User, ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { DEMO_PROFILE } from "@/lib/demo-data";
 
 interface ProfileStepProps {
   graduationDate: string;
@@ -65,6 +67,20 @@ export default function ProfileStep({
   onBack,
   onNext,
 }: ProfileStepProps) {
+  const { toast } = useToast();
+
+  const handleLoadDemo = () => {
+    setGraduationDate(DEMO_PROFILE.graduationDate);
+    setGender("male");
+    setRace("asian");
+    setWorkAuthorization("us-citizen");
+    setOtherInfo("James Scholars Honors Program. Activities: Pulse Competitions Committee, CS Sail Logistics Staff, Simplify Campus Ambassador.");
+    toast({
+      title: "Demo profile loaded",
+      description: "Profile pre-filled with demo data.",
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -79,6 +95,16 @@ export default function ProfileStep({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Demo Button */}
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full"
+          onClick={handleLoadDemo}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Load Demo Profile
+        </Button>
         {/* Graduation Date */}
         <div className="space-y-2">
           <Label htmlFor="graduationDate">Graduation Date</Label>

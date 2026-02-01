@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { DEMO_FILLED_FIELDS } from "@/lib/demo-data";
 import { 
   FileEdit, 
   Building2, 
@@ -44,28 +45,6 @@ type ApplicationDraft = {
   answers_json: Record<string, string> | null;
   tailoring_notes: Record<string, string> | null;
 };
-
-type FilledField = {
-  label: string;
-  value: string;
-};
-
-// Demo data for Ramp - hardcoded based on resume
-const RAMP_DEMO_FIELDS: FilledField[] = [
-  { label: "Full Name", value: "Aditya Barman" },
-  { label: "Email", value: "a02barman@gmail.com" },
-  { label: "Phone", value: "(848) 259-7203" },
-  { label: "LinkedIn", value: "linkedin.com/in/adityabarman/" },
-  { label: "University", value: "University of Illinois at Urbana-Champaign" },
-  { label: "Degree", value: "B.S. in Computer Science & Statistics, Minor in Mathematics" },
-  { label: "Graduation Date", value: "May 2028" },
-  { label: "GPA", value: "4.0/4.0" },
-  { label: "Work Authorization", value: "U.S. Citizen" },
-  { label: "Gender", value: "Male" },
-  { label: "Race/Ethnicity", value: "Asian" },
-  { label: "Are you legally authorized to work in the United States?", value: "Yes" },
-  { label: "Do you now or will you in the future require sponsorship?", value: "No" },
-];
 
 export default function Draft() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -334,35 +313,33 @@ export default function Draft() {
         )}
       </Card>
 
-      {/* Filled Fields Card - Show for Ramp with demo data */}
-      {match?.job_posts?.company === "Ramp" && (
-        <Card className="border-green-200 dark:border-green-900">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <User className="h-5 w-5 text-green-600 dark:text-green-400" />
-              <div>
-                <CardTitle className="text-lg">Auto-Filled Fields</CardTitle>
-                <CardDescription>
-                  These fields were automatically filled from your profile
-                </CardDescription>
-              </div>
+      {/* Auto-Filled Fields Card - Show for all companies */}
+      <Card className="border-green-200 dark:border-green-900">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div>
+              <CardTitle className="text-lg">Auto-Filled Fields</CardTitle>
+              <CardDescription>
+                These fields were automatically filled from your profile
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {RAMP_DEMO_FIELDS.map((field) => (
-                <div key={field.label} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">{field.label}</p>
-                    <p className="text-sm font-medium truncate">{field.value}</p>
-                  </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {DEMO_FILLED_FIELDS.map((field) => (
+              <div key={field.label} className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">{field.label}</p>
+                  <p className="text-sm font-medium truncate">{field.value}</p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Application Draft Card */}
       <Card>

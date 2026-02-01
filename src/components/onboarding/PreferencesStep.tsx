@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Settings, ArrowLeft, X, Loader2 } from "lucide-react";
+import { Settings, ArrowLeft, X, Loader2, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { DEMO_PREFERENCES } from "@/lib/demo-data";
 
 interface PreferencesStepProps {
   roles: string[];
@@ -45,6 +47,20 @@ export default function PreferencesStep({
   onSubmit,
   loading,
 }: PreferencesStepProps) {
+  const { toast } = useToast();
+
+  const handleLoadDemo = () => {
+    setRoles(DEMO_PREFERENCES.roles);
+    setLocations(DEMO_PREFERENCES.locations);
+    setRemoteOk(DEMO_PREFERENCES.remoteOk);
+    setSponsorshipNeeded(DEMO_PREFERENCES.sponsorshipNeeded);
+    setMinSalary("");
+    toast({
+      title: "Demo preferences loaded",
+      description: "Preferences pre-filled with demo data.",
+    });
+  };
+
   const handleAddRole = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && roleInput.trim()) {
       e.preventDefault();
@@ -85,6 +101,16 @@ export default function PreferencesStep({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Demo Button */}
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full"
+          onClick={handleLoadDemo}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Load Demo Preferences
+        </Button>
         {/* Roles */}
         <div className="space-y-2">
           <Label htmlFor="roles">Target Roles</Label>
