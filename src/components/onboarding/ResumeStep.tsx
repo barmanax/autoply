@@ -7,12 +7,34 @@ import { Input } from "@/components/ui/input";
 import { FileText, ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import * as pdfjsLib from "pdfjs-dist";
+
+// Set up the worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface ResumeStepProps {
   userId: string;
   resumeText: string;
   setResumeText: (text: string) => void;
   onNext: () => void;
+}
+
+async function extractTextFromPdf(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+  let fullText = "";
+  
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .join(" ");
+    fullText += pageText + "\n\n";
+  }
+  
+  return fullText.trim();
 }
 
 export default function ResumeStep({ userId, resumeText, setResumeText, onNext }: ResumeStepProps) {
@@ -46,20 +68,34 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
     setUploading(true);
 
     try {
-      const filePath = `${userId}/${Date.now()}_${file.name}`;
+      // Extract text from PDF
+      const extractedText = await extractTextFromPdf(file);
       
+      // Upload to storage
+      const filePath = `${userId}/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("resumes")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
+      // Auto-fill the resume text
+      if (extractedText && extractedText.length > 0) {
+        setResumeText(extractedText);
+        toast({
+          title: "Resume uploaded & extracted",
+          description: "Your resume text has been auto-filled. Review and edit if needed.",
+        });
+      } else {
+        toast({
+          title: "Resume uploaded",
+          description: "PDF uploaded but text extraction was empty. Please paste your resume text manually.",
+        });
+      }
+
       setUploadedFileName(file.name);
-      toast({
-        title: "Resume uploaded",
-        description: "Your PDF resume has been uploaded successfully.",
-      });
     } catch (error: any) {
+      console.error("Upload/extraction error:", error);
       toast({
         title: "Upload failed",
         description: error.message || "Something went wrong.",
