@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.skip]
 verify_jwt = false
+
+[functions.seed-jobs]
+verify_jwt = false
