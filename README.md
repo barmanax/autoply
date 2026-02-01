@@ -1,73 +1,61 @@
-# Welcome to your Lovable project
+# Autoply
 
-## Project info
+**Autoply** is an AI-powered job application automation tool. It finds relevant jobs, drafts complete applications using AI, and lets users approve or deny them in one click.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+> *Your applications. Written by AI. Approved by you.*
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🚀 What It Does
+- **Job discovery** – Finds open roles that match your preferences  
+- **AI fit scoring** – Scores each job against your resume with clear reasoning  
+- **Application drafting** – Generates tailored cover letters and common application answers  
+- **One-click approval** – Review, edit, approve, or skip applications in-app  
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🧠 How It Works
+1. User uploads a resume and sets job preferences  
+2. User clicks **“Check today’s open roles”**  
+3. An AI agent pipeline:
+   - loads job postings  
+   - scores job fit  
+   - drafts applications for top matches  
+4. Drafts appear in an inbox for review  
+5. User approves or denies each application  
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 🛠 Tech Stack
+- **Frontend & Backend:** Next.js (Lovable)  
+- **Auth & Database:** Supabase  
+- **LLM Routing:** Keywords AI Gateway  
+- **Models:** OpenAI-compatible models via Keywords  
+- **Deployment:** Lovable  
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## ⚠️ Notes
+- This is a **demo-ready MVP**  
+- Applications submit to a **mock endpoint** for reliability  
+- No email, SMS, or real ATS integration (by design)  
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🎬 Demo Flow
+1. Onboard with resume + preferences  
+2. Run pipeline  
+3. Review drafted applications  
+4. Approve or deny with one click  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🔮 Future Work
+- Real ATS integrations  
+- Email/SMS approvals  
+- Live job scraping  
+- Scheduling & batching applications  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Built for the Keywords AI Hackathon 💙
