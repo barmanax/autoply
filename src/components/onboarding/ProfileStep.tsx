@@ -82,38 +82,43 @@ export default function ProfileStep({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <User className="h-6 w-6 text-primary" />
+    <Card className="border-border/50 bg-card/50 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+      <CardHeader className="relative">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+            <User className="h-6 w-6 text-primary" />
+          </div>
           <div>
-            <CardTitle>Your Profile</CardTitle>
+            <CardTitle className="text-xl">Your Profile</CardTitle>
             <CardDescription>
               This info helps auto-fill application questions
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="relative space-y-6">
         {/* Demo Button */}
         <Button
           type="button"
-          variant="secondary"
-          className="w-full"
+          variant="outline"
+          className="w-full h-12 border-accent/30 bg-accent/5 text-accent-foreground hover:bg-accent/10 hover:border-accent/50 transition-all"
           onClick={handleLoadDemo}
         >
-          <Sparkles className="mr-2 h-4 w-4" />
+          <Sparkles className="mr-2 h-4 w-4 text-accent" />
           Load Demo Profile
         </Button>
+
         {/* Graduation Date */}
-        <div className="space-y-2">
-          <Label htmlFor="graduationDate">Graduation Date</Label>
+        <div className="space-y-3">
+          <Label htmlFor="graduationDate" className="text-sm font-semibold">Graduation Date</Label>
           <Input
             id="graduationDate"
             type="month"
             value={graduationDate}
             onChange={(e) => setGraduationDate(e.target.value)}
             placeholder="Select graduation month"
+            className="h-12 bg-muted/30 border-border/50 focus:border-primary"
           />
           <p className="text-xs text-muted-foreground">
             Your expected or actual graduation date
@@ -121,10 +126,10 @@ export default function ProfileStep({
         </div>
 
         {/* Gender */}
-        <div className="space-y-2">
-          <Label>Gender</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Gender</Label>
           <Select value={gender} onValueChange={setGender}>
-            <SelectTrigger>
+            <SelectTrigger className="h-12 bg-muted/30 border-border/50 focus:border-primary">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
@@ -141,10 +146,10 @@ export default function ProfileStep({
         </div>
 
         {/* Race/Ethnicity */}
-        <div className="space-y-2">
-          <Label>Race/Ethnicity</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Race/Ethnicity</Label>
           <Select value={race} onValueChange={setRace}>
-            <SelectTrigger>
+            <SelectTrigger className="h-12 bg-muted/30 border-border/50 focus:border-primary">
               <SelectValue placeholder="Select race/ethnicity" />
             </SelectTrigger>
             <SelectContent>
@@ -161,10 +166,10 @@ export default function ProfileStep({
         </div>
 
         {/* Work Authorization */}
-        <div className="space-y-2">
-          <Label>Work Authorization</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Work Authorization</Label>
           <Select value={workAuthorization} onValueChange={setWorkAuthorization}>
-            <SelectTrigger>
+            <SelectTrigger className="h-12 bg-muted/30 border-border/50 focus:border-primary">
               <SelectValue placeholder="Select work authorization" />
             </SelectTrigger>
             <SelectContent>
@@ -181,14 +186,14 @@ export default function ProfileStep({
         </div>
 
         {/* Other Info */}
-        <div className="space-y-2">
-          <Label htmlFor="otherInfo">Other Information</Label>
+        <div className="space-y-3">
+          <Label htmlFor="otherInfo" className="text-sm font-semibold">Other Information</Label>
           <Textarea
             id="otherInfo"
             placeholder="Any additional info the LLM should know when auto-filling applications (e.g., preferred pronouns, disability status, veteran status, etc.)"
             value={otherInfo}
             onChange={(e) => setOtherInfo(e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[100px] bg-muted/30 border-border/50 focus:border-primary resize-none"
           />
           <p className="text-xs text-muted-foreground">
             Optional context for uncommon application questions
@@ -196,11 +201,18 @@ export default function ProfileStep({
         </div>
 
         <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={onBack}>
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="h-12 px-6 border-border/50 hover:bg-muted/50 transition-all"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <Button onClick={onNext}>
+          <Button 
+            onClick={onNext}
+            className="h-12 px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+          >
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

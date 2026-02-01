@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { DEMO_RESUME_TEXT } from "@/lib/demo-data";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Set up the worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 interface ResumeStepProps {
@@ -69,7 +68,6 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
     setUploading(true);
 
     try {
-      // Extract text from PDF
       const extractedText = await extractTextFromPdf(file);
       
       if (extractedText.length < 50) {
@@ -81,10 +79,8 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
         return;
       }
 
-      // Set the extracted text
       setResumeText(extractedText);
       
-      // Also upload the file to storage
       const filePath = `${userId}/${Date.now()}_${file.name}`;
       
       const { error: uploadError } = await supabase.storage
@@ -93,7 +89,6 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
 
       if (uploadError) {
         console.warn("Storage upload failed:", uploadError);
-        // Don't fail the whole operation - text extraction succeeded
       }
 
       setUploadedFileName(file.name);
@@ -114,24 +109,27 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <FileText className="h-6 w-6 text-primary" />
+    <Card className="border-border/50 bg-card/50 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+      <CardHeader className="relative">
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+            <FileText className="h-6 w-6 text-primary" />
+          </div>
           <div>
-            <CardTitle>Your Resume</CardTitle>
+            <CardTitle className="text-xl">Your Resume</CardTitle>
             <CardDescription>
               Upload a PDF and/or paste your resume text
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="relative space-y-6">
         {/* Demo Button */}
         <Button
           type="button"
-          variant="secondary"
-          className="w-full"
+          variant="outline"
+          className="w-full h-12 border-accent/30 bg-accent/5 text-accent-foreground hover:bg-accent/10 hover:border-accent/50 transition-all"
           onClick={() => {
             setResumeText(DEMO_RESUME_TEXT);
             setUploadedFileName("demo_resume.pdf");
@@ -141,13 +139,13 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
             });
           }}
         >
-          <Sparkles className="mr-2 h-4 w-4" />
+          <Sparkles className="mr-2 h-4 w-4 text-accent" />
           Load Demo Resume
         </Button>
 
         {/* PDF Upload */}
-        <div className="space-y-2">
-          <Label>Resume PDF (optional)</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Resume PDF (optional)</Label>
           <div className="flex items-center gap-3">
             <Input
               ref={fileInputRef}
@@ -161,6 +159,7 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="h-12 px-6 border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all"
             >
               {uploading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -170,8 +169,8 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
               Upload PDF
             </Button>
             {uploadedFileName && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-success/10 border border-success/20 px-3 py-2 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-success" />
                 {uploadedFileName}
               </div>
             )}
@@ -180,22 +179,36 @@ export default function ResumeStep({ userId, resumeText, setResumeText, onNext }
         </div>
 
         {/* Resume Text */}
-        <div className="space-y-2">
-          <Label htmlFor="resume">Resume Text</Label>
+        <div className="space-y-3">
+          <Label htmlFor="resume" className="text-sm font-semibold">Resume Text</Label>
           <Textarea
             id="resume"
             placeholder="Paste your resume content here..."
             value={resumeText}
             onChange={(e) => setResumeText(e.target.value)}
-            className="min-h-[250px] font-mono text-sm"
+            className="min-h-[250px] font-mono text-sm bg-muted/30 border-border/50 focus:border-primary resize-none"
           />
-          <p className="text-xs text-muted-foreground">
-            {resumeText.length} characters (minimum 50 required)
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {resumeText.length} characters (minimum 50 required)
+            </p>
+            <div className={`h-1.5 w-24 rounded-full overflow-hidden bg-muted`}>
+              <div 
+                className={`h-full transition-all duration-300 ${
+                  resumeText.length >= 50 ? "bg-success" : "bg-primary"
+                }`}
+                style={{ width: `${Math.min((resumeText.length / 50) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button onClick={onNext} disabled={resumeText.trim().length < 50}>
+        <div className="flex justify-end pt-4">
+          <Button 
+            onClick={onNext} 
+            disabled={resumeText.trim().length < 50}
+            className="h-12 px-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+          >
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

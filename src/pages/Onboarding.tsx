@@ -95,7 +95,6 @@ export default function Onboarding() {
     setLoading(true);
 
     try {
-      // Save resume
       const { error: resumeError } = await supabase.from("resumes").upsert(
         {
           user_id: user.id,
@@ -106,7 +105,6 @@ export default function Onboarding() {
 
       if (resumeError) throw resumeError;
 
-      // Save profile with new fields
       const gradDateValue = graduationDate ? `${graduationDate}-01` : null;
       
       const { error: profileError } = await supabase.from("profiles").upsert(
@@ -123,7 +121,6 @@ export default function Onboarding() {
 
       if (profileError) throw profileError;
 
-      // Save preferences
       const { error: prefsError } = await supabase.from("preferences").upsert(
         {
           user_id: user.id,
@@ -157,66 +154,76 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Onboarding</h1>
-        <p className="text-muted-foreground mt-1">Step {step} of 3</p>
+    <div className="max-w-2xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Onboarding</h1>
+        <p className="text-muted-foreground">Step {step} of 3</p>
       </div>
 
       {/* Progress indicator */}
       <div className="flex gap-2">
-        <div className={`h-2 flex-1 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
-        <div className={`h-2 flex-1 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
-        <div className={`h-2 flex-1 rounded-full ${step >= 3 ? "bg-primary" : "bg-muted"}`} />
+        {[1, 2, 3].map((s) => (
+          <div 
+            key={s}
+            className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+              step >= s 
+                ? "bg-gradient-to-r from-primary to-accent" 
+                : "bg-muted"
+            }`} 
+          />
+        ))}
       </div>
 
-      {step === 1 && user && (
-        <ResumeStep
-          userId={user.id}
-          resumeText={resumeText}
-          setResumeText={setResumeText}
-          onNext={handleStep1Next}
-        />
-      )}
+      <div className="animate-fade-in">
+        {step === 1 && user && (
+          <ResumeStep
+            userId={user.id}
+            resumeText={resumeText}
+            setResumeText={setResumeText}
+            onNext={handleStep1Next}
+          />
+        )}
 
-      {step === 2 && (
-        <ProfileStep
-          graduationDate={graduationDate}
-          setGraduationDate={setGraduationDate}
-          gender={gender}
-          setGender={setGender}
-          race={race}
-          setRace={setRace}
-          workAuthorization={workAuthorization}
-          setWorkAuthorization={setWorkAuthorization}
-          otherInfo={otherInfo}
-          setOtherInfo={setOtherInfo}
-          onBack={() => setStep(1)}
-          onNext={handleStep2Next}
-        />
-      )}
+        {step === 2 && (
+          <ProfileStep
+            graduationDate={graduationDate}
+            setGraduationDate={setGraduationDate}
+            gender={gender}
+            setGender={setGender}
+            race={race}
+            setRace={setRace}
+            workAuthorization={workAuthorization}
+            setWorkAuthorization={setWorkAuthorization}
+            otherInfo={otherInfo}
+            setOtherInfo={setOtherInfo}
+            onBack={() => setStep(1)}
+            onNext={handleStep2Next}
+          />
+        )}
 
-      {step === 3 && (
-        <PreferencesStep
-          roles={roles}
-          setRoles={setRoles}
-          roleInput={roleInput}
-          setRoleInput={setRoleInput}
-          locations={locations}
-          setLocations={setLocations}
-          locationInput={locationInput}
-          setLocationInput={setLocationInput}
-          remoteOk={remoteOk}
-          setRemoteOk={setRemoteOk}
-          sponsorshipNeeded={sponsorshipNeeded}
-          setSponsorshipNeeded={setSponsorshipNeeded}
-          minSalary={minSalary}
-          setMinSalary={setMinSalary}
-          onBack={() => setStep(2)}
-          onSubmit={handleSubmit}
-          loading={loading}
-        />
-      )}
+        {step === 3 && (
+          <PreferencesStep
+            roles={roles}
+            setRoles={setRoles}
+            roleInput={roleInput}
+            setRoleInput={setRoleInput}
+            locations={locations}
+            setLocations={setLocations}
+            locationInput={locationInput}
+            setLocationInput={setLocationInput}
+            remoteOk={remoteOk}
+            setRemoteOk={setRemoteOk}
+            sponsorshipNeeded={sponsorshipNeeded}
+            setSponsorshipNeeded={setSponsorshipNeeded}
+            minSalary={minSalary}
+            setMinSalary={setMinSalary}
+            onBack={() => setStep(2)}
+            onSubmit={handleSubmit}
+            loading={loading}
+          />
+        )}
+      </div>
     </div>
   );
 }

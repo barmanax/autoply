@@ -78,7 +78,6 @@ export default function AdminRun() {
   const navigate = useNavigate();
   const [result, setResult] = useState<PipelineResult | null>(null);
   
-  // Schedule state (dummy for MVP)
   const [scheduleTime, setScheduleTime] = useState("09:00");
   const [scheduleTimezone, setScheduleTimezone] = useState("America/New_York");
   const [selectedDays, setSelectedDays] = useState<string[]>(["mon", "tue", "wed", "thu", "fri"]);
@@ -120,13 +119,13 @@ export default function AdminRun() {
   const getStepStatus = (step: PipelineStep) => {
     switch (step.status) {
       case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "failed":
         return <XCircle className="h-5 w-5 text-destructive" />;
       case "running":
         return <Loader2 className="h-5 w-5 text-primary animate-spin" />;
       default:
-        return <Clock className="h-5 w-5 text-muted-foreground/50" />;
+        return <Clock className="h-5 w-5 text-muted-foreground/40" />;
     }
   };
 
@@ -152,12 +151,17 @@ export default function AdminRun() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border p-8">
+      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
         <div className="relative">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <Zap className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-4 mb-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/30 blur-xl rounded-xl" />
+              <div className="relative p-3 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+                <Zap className="h-6 w-6 text-primary-foreground" />
+              </div>
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Pipeline Control</h1>
           </div>
@@ -168,12 +172,12 @@ export default function AdminRun() {
       </div>
 
       <Tabs defaultValue="run" className="w-full">
-        <TabsList className="grid w-full max-w-lg grid-cols-2 p-1 h-12">
-          <TabsTrigger value="run" className="gap-2 text-sm data-[state=active]:shadow-md transition-all">
+        <TabsList className="grid w-full max-w-md grid-cols-2 p-1.5 h-14 bg-muted/50 border border-border/50">
+          <TabsTrigger value="run" className="gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all rounded-lg">
             <Play className="h-4 w-4" />
             Run Now
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="gap-2 text-sm data-[state=active]:shadow-md transition-all">
+          <TabsTrigger value="schedule" className="gap-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all rounded-lg">
             <CalendarClock className="h-4 w-4" />
             Schedule
           </TabsTrigger>
@@ -181,16 +185,17 @@ export default function AdminRun() {
 
         <TabsContent value="run" className="mt-8 space-y-6 animate-fade-in">
           {/* Run Button Card */}
-          <Card className="overflow-hidden border-2 hover:border-primary/50 transition-colors">
-            <CardHeader className="bg-gradient-to-r from-muted/50 to-transparent">
+          <Card className="overflow-hidden border-border/50 bg-card/50 hover:border-primary/30 transition-all">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+            <CardHeader className="relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-primary/10 ring-4 ring-primary/5">
+                  <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
                     <Sparkles className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-xl">Run Pipeline</CardTitle>
-                    <CardDescription className="text-sm">
+                    <CardDescription>
                       Scrape → Match → Draft in one click
                     </CardDescription>
                   </div>
@@ -202,7 +207,7 @@ export default function AdminRun() {
                   }}
                   disabled={runPipeline.isPending}
                   size="lg"
-                  className="h-12 px-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  className="h-12 px-6 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
                 >
                   {runPipeline.isPending ? (
                     <>
@@ -220,17 +225,20 @@ export default function AdminRun() {
             </CardHeader>
             
             {(runPipeline.isPending || result) && (
-              <CardContent className="pt-6 space-y-6">
+              <CardContent className="relative pt-6 space-y-6">
                 {/* Progress bar */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground font-medium">Pipeline Progress</span>
                     <span className="font-bold text-primary">{Math.round(getProgressValue())}%</span>
                   </div>
-                  <div className="relative">
-                    <Progress value={getProgressValue()} className="h-3" />
+                  <div className="relative h-3 rounded-full bg-muted overflow-hidden">
                     <div 
-                      className="absolute top-0 left-0 h-3 bg-primary/20 rounded-full animate-pulse"
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+                      style={{ width: `${getProgressValue()}%` }}
+                    />
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-primary/30 rounded-full animate-pulse"
                       style={{ width: `${getProgressValue()}%` }}
                     />
                   </div>
@@ -242,7 +250,7 @@ export default function AdminRun() {
                     { id: "scrape", name: "Scraping job boards", status: "pending" as const },
                     { id: "match", name: "Matching jobs to profile", status: "pending" as const },
                     { id: "draft", name: "Generating application drafts", status: "pending" as const },
-                  ]).map((step, index) => {
+                  ]).map((step) => {
                     const Icon = stepIcons[step.id] || Search;
                     const isActive = step.status === "running";
                     const isComplete = step.status === "completed";
@@ -250,14 +258,14 @@ export default function AdminRun() {
                     return (
                       <div
                         key={step.id}
-                        className={`relative flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-300 ${
+                        className={`relative flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${
                           isActive
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                             : isComplete
-                            ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20"
+                            ? "border-success/30 bg-success/5"
                             : step.status === "failed"
-                            ? "border-destructive/50 bg-destructive/5"
-                            : "border-border/50 bg-muted/20"
+                            ? "border-destructive/30 bg-destructive/5"
+                            : "border-border/30 bg-muted/20"
                         }`}
                       >
                         {isActive && (
@@ -266,17 +274,17 @@ export default function AdminRun() {
                         <div className="relative flex items-center gap-4">
                           <div className={`p-2.5 rounded-xl transition-all ${
                             isComplete 
-                              ? "bg-emerald-100 dark:bg-emerald-900/50" 
+                              ? "bg-success/10 border border-success/20" 
                               : isActive
-                              ? "bg-primary/15 ring-2 ring-primary/20"
-                              : "bg-muted/50"
+                              ? "bg-primary/10 border border-primary/20"
+                              : "bg-muted/30"
                           }`}>
                             <Icon className={`h-5 w-5 transition-colors ${
                               isComplete 
-                                ? "text-emerald-600 dark:text-emerald-400" 
+                                ? "text-success" 
                                 : isActive
                                 ? "text-primary"
-                                : "text-muted-foreground/60"
+                                : "text-muted-foreground/50"
                             }`} />
                           </div>
                           <div>
@@ -290,7 +298,7 @@ export default function AdminRun() {
                         </div>
                         <div className="relative flex items-center gap-3">
                           {step.count !== undefined && (
-                            <span className="text-sm font-semibold bg-muted px-2.5 py-1 rounded-full">
+                            <span className="text-sm font-bold px-3 py-1 rounded-full bg-muted border border-border/50">
                               {step.count}
                             </span>
                           )}
@@ -306,18 +314,19 @@ export default function AdminRun() {
 
           {/* Summary Card */}
           {result?.summary && !runPipeline.isPending && (
-            <Card className="border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-50/80 via-emerald-50/50 to-background dark:from-emerald-950/30 dark:via-emerald-950/10 dark:to-background overflow-hidden animate-scale-in">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+            <Card className="border-success/30 bg-success/5 overflow-hidden animate-scale-in">
+              <div className="absolute inset-0 bg-gradient-to-br from-success/10 via-transparent to-transparent" />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-success/10 rounded-full blur-3xl" />
               <CardHeader className="relative">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-emerald-500/15 ring-4 ring-emerald-500/10">
-                    <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-3 rounded-2xl bg-success/10 border border-success/20">
+                    <CheckCircle2 className="h-7 w-7 text-success" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl text-emerald-800 dark:text-emerald-200">
+                    <CardTitle className="text-xl text-success">
                       Pipeline Complete! 🎉
                     </CardTitle>
-                    <CardDescription className="text-emerald-700/70 dark:text-emerald-300/70">
+                    <CardDescription>
                       Finished in {formatDuration(result.summary.duration)}
                     </CardDescription>
                   </div>
@@ -332,11 +341,10 @@ export default function AdminRun() {
                   ].map((stat, i) => (
                     <div 
                       key={stat.label}
-                      className="text-center p-5 bg-background/80 backdrop-blur rounded-xl border-2 border-emerald-200/50 dark:border-emerald-800/30 hover:scale-105 transition-transform"
-                      style={{ animationDelay: `${i * 100}ms` }}
+                      className="text-center p-5 bg-card/80 backdrop-blur rounded-xl border border-success/20 hover:scale-105 transition-transform"
                     >
-                      <stat.icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
-                      <p className="text-4xl font-bold bg-gradient-to-br from-emerald-600 to-primary bg-clip-text text-transparent">
+                      <stat.icon className="h-5 w-5 text-success mx-auto mb-2" />
+                      <p className="text-4xl font-bold text-success">
                         {stat.value}
                       </p>
                       <p className="text-sm text-muted-foreground mt-1 font-medium">{stat.label}</p>
@@ -347,7 +355,7 @@ export default function AdminRun() {
                   <Button 
                     onClick={() => navigate("/inbox")} 
                     size="lg"
-                    className="gap-2 h-12 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                    className="gap-2 h-12 px-8 text-base font-semibold bg-gradient-to-r from-success to-success/90 hover:from-success/90 hover:to-success shadow-lg hover:shadow-success/25 transition-all hover:-translate-y-0.5"
                   >
                     View Your Matches
                     <ArrowRight className="h-5 w-5" />
@@ -359,7 +367,7 @@ export default function AdminRun() {
 
           {/* Error state */}
           {runPipeline.isError && (
-            <Card className="border-2 border-destructive/50 animate-fade-in">
+            <Card className="border-destructive/50 bg-destructive/5 animate-fade-in">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4 text-destructive">
                   <div className="p-2 rounded-xl bg-destructive/10">
@@ -367,7 +375,7 @@ export default function AdminRun() {
                   </div>
                   <div>
                     <p className="font-semibold">Pipeline Failed</p>
-                    <p className="text-sm text-destructive/80">
+                    <p className="text-sm opacity-80">
                       {runPipeline.error instanceof Error 
                         ? runPipeline.error.message 
                         : "Failed to run pipeline"}
@@ -380,10 +388,11 @@ export default function AdminRun() {
         </TabsContent>
 
         <TabsContent value="schedule" className="mt-8 animate-fade-in">
-          <Card className="overflow-hidden border-2">
-            <CardHeader className="bg-gradient-to-r from-muted/50 to-transparent pb-8">
+          <Card className="overflow-hidden border-border/50 bg-card/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
+            <CardHeader className="relative pb-8">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 ring-4 ring-primary/5">
+                <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
                   <CalendarClock className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -394,11 +403,11 @@ export default function AdminRun() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-8 pt-2">
+            <CardContent className="relative space-y-8 pt-2">
               {/* Time Preview */}
               <div className="flex items-center justify-center py-6">
                 <div className="text-center">
-                  <div className="text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  <div className="text-5xl font-bold tracking-tight gradient-text">
                     {formatTimeDisplay(scheduleTime)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -412,33 +421,33 @@ export default function AdminRun() {
                 <div className="space-y-3">
                   <Label htmlFor="schedule-time" className="flex items-center gap-2 text-sm font-semibold">
                     <Clock className="h-4 w-4 text-primary" />
-                    Time to Run
+                    Run Time
                   </Label>
                   <Input
                     id="schedule-time"
                     type="time"
                     value={scheduleTime}
                     onChange={(e) => setScheduleTime(e.target.value)}
-                    className="h-12 text-lg font-medium"
+                    className="h-12 text-lg font-mono bg-muted/30 border-border/50 focus:border-primary"
                   />
                 </div>
 
                 {/* Timezone Selection */}
                 <div className="space-y-3">
-                  <Label htmlFor="timezone" className="flex items-center gap-2 text-sm font-semibold">
+                  <Label htmlFor="schedule-timezone" className="flex items-center gap-2 text-sm font-semibold">
                     <Globe className="h-4 w-4 text-primary" />
                     Timezone
                   </Label>
                   <Select value={scheduleTimezone} onValueChange={setScheduleTimezone}>
-                    <SelectTrigger id="timezone" className="h-12">
-                      <SelectValue placeholder="Select timezone" />
+                    <SelectTrigger className="h-12 bg-muted/30 border-border/50 focus:border-primary">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {TIMEZONES.map((tz) => (
+                      {TIMEZONES.map(tz => (
                         <SelectItem key={tz.value} value={tz.value}>
-                          <span className="flex items-center justify-between gap-4">
+                          <span className="flex items-center gap-2">
                             <span>{tz.label}</span>
-                            <span className="text-xs text-muted-foreground">{tz.offset}</span>
+                            <span className="text-xs text-muted-foreground">({tz.offset})</span>
                           </span>
                         </SelectItem>
                       ))}
@@ -447,105 +456,76 @@ export default function AdminRun() {
                 </div>
               </div>
 
-              {/* Weekday Selection */}
+              {/* Day Selection */}
               <div className="space-y-4">
                 <Label className="flex items-center gap-2 text-sm font-semibold">
                   <CalendarClock className="h-4 w-4 text-primary" />
-                  Days to Run
+                  Run on these days
                 </Label>
-                <div className="flex justify-center gap-2">
-                  {WEEKDAYS.map((day, index) => {
-                    const isSelected = selectedDays.includes(day.id);
-                    return (
-                      <button
-                        key={day.id}
-                        onClick={() => handleDayToggle(day.id)}
-                        className={`relative w-12 h-12 rounded-full font-semibold text-sm transition-all duration-200 hover:scale-110 ${
-                          isSelected
-                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted border-2 border-transparent hover:border-primary/20"
-                        }`}
-                        title={day.full}
-                      >
-                        {day.label}
-                        {isSelected && (
-                          <div className="absolute inset-0 rounded-full ring-4 ring-primary/20 animate-pulse" />
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="flex gap-2 justify-center">
+                  {WEEKDAYS.map((day) => (
+                    <button
+                      key={day.id}
+                      onClick={() => handleDayToggle(day.id)}
+                      className={`w-12 h-12 rounded-xl font-semibold text-sm transition-all ${
+                        selectedDays.includes(day.id)
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                          : "bg-muted/30 text-muted-foreground hover:bg-muted border border-border/50"
+                      }`}
+                      title={day.full}
+                    >
+                      {day.label}
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-center text-muted-foreground">
-                  {selectedDays.length === 0 
-                    ? "Select at least one day" 
-                    : selectedDays.length === 7 
-                    ? "Running every day" 
-                    : `Running ${selectedDays.length} days per week`}
-                </p>
               </div>
 
-              {/* Email Notification */}
+              {/* Notification Email */}
               <div className="space-y-3">
                 <Label htmlFor="notification-email" className="flex items-center gap-2 text-sm font-semibold">
-                  <Bell className="h-4 w-4 text-primary" />
-                  Notification Email
+                  <Mail className="h-4 w-4 text-primary" />
+                  Notification Email (optional)
                 </Label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="notification-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={notificationEmail}
-                    onChange={(e) => setNotificationEmail(e.target.value)}
-                    className="h-12 pl-12 text-base"
-                  />
-                </div>
+                <Input
+                  id="notification-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={notificationEmail}
+                  onChange={(e) => setNotificationEmail(e.target.value)}
+                  className="h-12 bg-muted/30 border-border/50 focus:border-primary"
+                />
                 <p className="text-xs text-muted-foreground">
-                  Receive a daily summary of your top matched jobs
+                  Get notified when new matches are found
                 </p>
               </div>
 
               {/* Save Button */}
               <div className="pt-4">
-                <Button 
-                  onClick={handleSaveSchedule} 
-                  size="lg"
-                  className={`w-full h-14 text-base font-semibold transition-all ${
-                    scheduleSaved 
-                      ? "bg-emerald-600 hover:bg-emerald-600 shadow-lg shadow-emerald-500/30" 
-                      : "shadow-lg hover:shadow-xl hover:scale-[1.02]"
-                  }`}
-                  disabled={selectedDays.length === 0}
+                <Button
+                  onClick={handleSaveSchedule}
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5"
+                  disabled={scheduleSaved}
                 >
                   {scheduleSaved ? (
                     <>
                       <CheckCircle2 className="h-5 w-5 mr-2" />
-                      Schedule Saved Successfully!
+                      Schedule Saved!
                     </>
                   ) : (
                     <>
-                      <CalendarClock className="h-5 w-5 mr-2" />
+                      <Bell className="h-5 w-5 mr-2" />
                       Save Schedule
                     </>
                   )}
                 </Button>
               </div>
 
-              {/* Info Box */}
-              <div className="rounded-xl bg-gradient-to-br from-muted/80 to-muted/40 border-2 border-dashed p-5">
-                <div className="flex gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 h-fit">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm mb-1">Coming Soon</p>
-                    <p className="text-sm text-muted-foreground">
-                      When enabled, Autoply will automatically scrape job boards, match positions to your profile, 
-                      and email you a personalized summary at your scheduled time.
-                    </p>
-                  </div>
-                </div>
+              {/* Demo Notice */}
+              <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/30">
+                <p className="text-sm text-muted-foreground text-center">
+                  <span className="font-semibold text-foreground">Demo Mode:</span> Scheduling is for demonstration only.
+                  In production, this would configure a real cron job.
+                </p>
               </div>
             </CardContent>
           </Card>

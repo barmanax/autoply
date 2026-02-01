@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Inbox as InboxIcon, Settings, Building2, MapPin, ExternalLink, Trash2, Loader2 } from "lucide-react";
+import { Inbox as InboxIcon, Settings, Building2, MapPin, ExternalLink, Trash2, Loader2, Sparkles } from "lucide-react";
 
 type JobMatch = {
   id: string;
@@ -55,7 +55,6 @@ export default function Inbox() {
     mutationFn: async () => {
       if (!user) throw new Error("Not authenticated");
 
-      // Get all job matches for this user
       const { data: userMatches, error: matchError } = await supabase
         .from("job_matches")
         .select("id")
@@ -66,7 +65,6 @@ export default function Inbox() {
       const matchIds = userMatches?.map(m => m.id) || [];
 
       if (matchIds.length > 0) {
-        // Delete application drafts first (foreign key constraint)
         const { error: draftsError } = await supabase
           .from("application_drafts")
           .delete()
@@ -74,7 +72,6 @@ export default function Inbox() {
 
         if (draftsError) throw draftsError;
 
-        // Delete submission events
         const { error: eventsError } = await supabase
           .from("submission_events")
           .delete()
@@ -82,7 +79,6 @@ export default function Inbox() {
 
         if (eventsError) throw eventsError;
 
-        // Delete job matches
         const { error: matchesDeleteError } = await supabase
           .from("job_matches")
           .delete()
@@ -126,25 +122,34 @@ export default function Inbox() {
 
   const getFitScoreColor = (score: number | null) => {
     if (!score) return "text-muted-foreground";
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) return "text-success";
+    if (score >= 60) return "text-amber-500";
+    return "text-destructive";
+  };
+
+  const getFitScoreBg = (score: number | null) => {
+    if (!score) return "bg-muted";
+    if (score >= 80) return "bg-success/10 border-success/20";
+    if (score >= 60) return "bg-amber-500/10 border-amber-500/20";
+    return "bg-destructive/10 border-destructive/20";
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-5xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Inbox</h1>
-          <p className="text-muted-foreground mt-1">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Inbox</h1>
+          <p className="text-muted-foreground">
             Your matched jobs and application status
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={() => clearInbox.mutate()}
             disabled={clearInbox.isPending || !matches?.length}
+            className="border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all"
           >
             {clearInbox.isPending ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -153,7 +158,7 @@ export default function Inbox() {
             )}
             Clear Inbox
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all">
             <Link to="/admin/run">
               <Settings className="h-4 w-4 mr-2" />
               Admin Run
@@ -165,13 +170,16 @@ export default function Inbox() {
       {isLoading && (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32 mt-2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-24" />
+            <Card key={i} className="border-border/50 bg-card/50">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-10 w-20" />
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -179,7 +187,7 @@ export default function Inbox() {
       )}
 
       {error && (
-        <Card className="border-destructive">
+        <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="pt-6">
             <p className="text-destructive">Failed to load job matches. Please try again.</p>
           </CardContent>
@@ -187,58 +195,66 @@ export default function Inbox() {
       )}
 
       {!isLoading && !error && matches?.length === 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <InboxIcon className="h-6 w-6 text-muted-foreground" />
-              <div>
-                <CardTitle>No matches yet</CardTitle>
-                <CardDescription>
-                  Run the job matcher to find opportunities that fit your profile
-                </CardDescription>
-              </div>
+        <Card className="border-border/50 bg-card/50 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+          <CardHeader className="relative text-center py-12">
+            <div className="mx-auto p-4 rounded-2xl bg-muted/50 border border-border/50 w-fit mb-4">
+              <InboxIcon className="h-10 w-10 text-muted-foreground" />
             </div>
+            <CardTitle className="text-xl">No matches yet</CardTitle>
+            <CardDescription className="max-w-sm mx-auto">
+              Run the job matcher to find opportunities that fit your profile
+            </CardDescription>
+            <Button asChild className="mt-6 mx-auto bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-primary/25 transition-all">
+              <Link to="/admin/run">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Run Pipeline
+              </Link>
+            </Button>
           </CardHeader>
         </Card>
       )}
 
       {!isLoading && !error && matches && matches.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-3 stagger-children">
           {matches.map((match) => (
             <Link key={match.id} to={`/draft/${match.id}`}>
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card className="border-border/50 bg-card/50 hover:bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer group">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold truncate">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold truncate group-hover:text-primary transition-colors">
                           {match.job_posts?.title || "Untitled Position"}
                         </h3>
-                        <Badge variant={getStatusVariant(match.status)}>
+                        <Badge 
+                          variant={getStatusVariant(match.status)}
+                          className="shrink-0"
+                        >
                           {match.status || "DRAFTED"}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Building2 className="h-3 w-3" />
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5" />
                           {match.job_posts?.company || "Unknown Company"}
                         </span>
                         {match.job_posts?.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
                             {match.job_posts.location}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">Fit Score</p>
-                        <p className={`text-lg font-bold ${getFitScoreColor(match.fit_score)}`}>
+                      <div className={`text-center px-4 py-2 rounded-xl border ${getFitScoreBg(match.fit_score)}`}>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Fit</p>
+                        <p className={`text-xl font-bold ${getFitScoreColor(match.fit_score)}`}>
                           {match.fit_score ?? "—"}%
                         </p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   </div>
                 </CardContent>
