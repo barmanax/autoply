@@ -34,4 +34,4 @@
 
 ---
 
-Built for the Keywords AI Hackathon 💙
+Built for the Keywords AI Hackathon (Lovable Track) 💙
