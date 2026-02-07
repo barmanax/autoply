@@ -9,8 +9,7 @@
 ## 🚀 What It Does
 - **Job discovery** – Finds open roles that match your preferences  
 - **AI fit scoring** – Scores each job against your resume with clear reasoning  
-- **Application drafting** – Generates tailored cover letters and common application answers  
-- **One-click approval** – Review, edit, approve, or skip applications in-app  
+- **Application drafting** – Generates tailored cover letters and application answers per application   
 
 ---
 
@@ -22,7 +21,6 @@
    - scores job fit  
    - drafts applications for top matches  
 4. Drafts appear in an inbox for review  
-5. User approves or denies each application  
 
 ---
 
@@ -33,21 +31,6 @@
 - **Models:** OpenAI-compatible models via Keywords  
 - **Deployment:** Lovable  
 
----
-
-## 🎬 Demo Flow
-1. Onboard with resume + preferences  
-2. Run pipeline  
-3. Review drafted applications  
-4. Approve or deny with one click  
-
----
-
-## 🔮 Future Work
-- Real ATS integrations  
-- Email/SMS approvals  
-- Live job scraping  
-- Scheduling & batching applications  
 
 ---
 
